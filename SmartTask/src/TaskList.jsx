@@ -22,17 +22,17 @@ function TaskList() {
     }, [isEditing])
 
     useEffect(() => {
-        if(!localStorage.getItem("tasks")){
+        if (!localStorage.getItem("tasks")) {
             localStorage.setItem("tasks", '[]')
         }
-        if(!localStorage.getItem("completedTasks")){
+        if (!localStorage.getItem("completedTasks")) {
             localStorage.setItem("completedTasks", '[]')
         }
-        if ((localStorage.getItem('tasks') != '[]' || localStorage.getItem('completedTasks') != '[]')  && tasks.length == 0) {
-            if(localStorage.getItem('tasks') != '[]'){
+        if ((localStorage.getItem('tasks') != '[]' || localStorage.getItem('completedTasks') != '[]') && tasks.length == 0) {
+            if (localStorage.getItem('tasks') != '[]') {
                 orderingTasks(JSON.parse(localStorage.getItem('tasks')))
             }
-            if(localStorage.getItem('completedTasks') != '[]'){
+            if (localStorage.getItem('completedTasks') != '[]') {
                 setCompletedTasks(JSON.parse(localStorage.getItem('completedTasks')))
             }
             return;
@@ -64,7 +64,7 @@ function TaskList() {
     }
 
     function handleSaveTask() {
-        let hora =  new Date().toLocaleString('pt-br').split(',')[0]
+        let hora = new Date().toLocaleString('pt-br').split(',')[0]
         hora = hora.split('/')
         hora = `${hora[2]}-${hora[1]}-${hora[0]}`
         if (newTaskTitle.trim() == '' || newTaskDueDate == '' || newTaskDueDate < hora || !(newTaskPriority <= 10 && newTaskPriority >= 1)) {
@@ -74,11 +74,11 @@ function TaskList() {
         document.querySelector('.form').style.display = 'none'
         if (isEditing) {
             let whereCameFrom = document.querySelector("#tipoTaskEditando").value
+            // console.log(document.querySelector("#tipoTaskEditando"))
             let tempTask = whereCameFrom == 'completedTasks' ? [...completedTasks] : [...tasks]
             let index = document.querySelector("#idEdicao").value
             let checked = whereCameFrom == 'completedTasks' ? true : false
             tempTask[index] = { title: newTaskTitle, description: newTaskDescription, dueDate: newTaskDueDate, priority: newTaskPriority, checked: checked }
-            console.log(whereCameFrom)
             whereCameFrom == 'completedTasks' ? setCompletedTasks(t => [...tempTask]) : orderingTasks([...tempTask]);
             return;
         }
@@ -123,17 +123,17 @@ function TaskList() {
     }
 
     function handleEditTask(index, whereCamefrom) {
+        console.log(whereCamefrom)
         setIsEditing(i => true)
         setNewTaskTitle(n => whereCamefrom == 'completedTasks' ? completedTasks[index].title : tasks[index].title);
-        setNewTaskDescription(n =>  whereCamefrom == 'completedTasks' ? completedTasks[index].description : tasks[index].description);
-        setNewTaskDueDate(n =>  whereCamefrom == 'completedTasks' ? completedTasks[index].dueDate : tasks[index].dueDate);
-        setNewTaskPriority(n =>  whereCamefrom == 'completedTasks' ? completedTasks[index].priority : tasks[index].priority)
+        setNewTaskDescription(n => whereCamefrom == 'completedTasks' ? completedTasks[index].description : tasks[index].description);
+        setNewTaskDueDate(n => whereCamefrom == 'completedTasks' ? completedTasks[index].dueDate : tasks[index].dueDate);
+        setNewTaskPriority(n => whereCamefrom == 'completedTasks' ? completedTasks[index].priority : tasks[index].priority)
 
 
         document.querySelector("#idEdicao").value = index
-        if(whereCamefrom == 'completedTasks'){
-            document.querySelector("#tipoTaskEditando").value = whereCamefrom == 'completedTasks' ? 'completedTasks' : 'normalTasks'
-        }
+        document.querySelector("#tipoTaskEditando").value = (whereCamefrom == 'completedTasks') ? 'completedTasks' : 'normalTasks'
+
 
         document.querySelector(".form").style.display = 'flex'
         document.querySelector(".inputTitle").focus()
@@ -161,9 +161,9 @@ function TaskList() {
             }
         }
         let fullOrganizedDates = []
-        for(let date in groupedDate){
+        for (let date in groupedDate) {
             let tempArray = groupedDate[date]
-            fullOrganizedDates.push(tempArray.sort((a, b) => parseInt(a.priority) - parseInt(b.priority)));
+            fullOrganizedDates.push(tempArray.sort((a, b) => parseInt(b.priority) - parseInt(a.priority)));
         };
         let orderedTasks = []
         fullOrganizedDates.forEach((date) => {
@@ -171,88 +171,96 @@ function TaskList() {
                 orderedTasks.push(task)
             })
         })
-        
+
         setTasks(t => orderedTasks)
 
     }
 
-    function handleCheckboxChange(e,index){
-        if(e.target.checked){
-            
+    function handleCheckboxChange(e, index) {
+        if (e.target.checked) {
+
             let newCompletedTask = tasks[index]
             newCompletedTask.checked = true
             setCompletedTasks(c => [...completedTasks, newCompletedTask])
-  
+
             let tempTasks = [...tasks]
             tempTasks = tempTasks.filter((_, i) => i != index)
             orderingTasks(tempTasks)
 
-        }else{
-            let hora =  new Date().toLocaleString('pt-br').split(',')[0]
+        } else {
+            let hora = new Date().toLocaleString('pt-br').split(',')[0]
             hora = hora.split('/')
             hora = `${hora[2]}-${hora[1]}-${hora[0]}`
-            if(completedTasks[index].dueDate < hora){
+            if (completedTasks[index].dueDate < hora) {
                 alert("Data invalida")
                 return;
             }
             let newTask = completedTasks[index]
             newTask.checked = false
             orderingTasks([...tasks, newTask])
-  
+
             let tempTasks = [...completedTasks]
             tempTasks = tempTasks.filter((_, i) => i != index)
             setCompletedTasks(tempTasks)
         }
-        
+
     }
 
     return (
         <>
             <div className="container">
                 <h1>Smart Task</h1>
-                <button onClick={showForm}>New</button>
-                <div className="listContainer">
-                    <ul>
-                        {tasks.map((task, index) =>
-                            <li key={index}>
-                                <input type="checkbox" onChange={(e) => handleCheckboxChange(e, index)} checked={task.checked}/>
-                                <span onClick={(e) => handleEditTask(index, 'normalTask')}>{task.title}</span>
-                            </li>
-                        )}
-                    </ul>
+                <div className="containerButton">
+                    <button onClick={showForm} className='novaTarefaButton'>Nova tarefa</button>
                 </div>
-                <div className="completeListContainer">
-                    <h2>Completed tasks</h2>
-                    <ul>
-                        {completedTasks.map((task, index) =>
-                            <li key={index}>
-                                <input type="checkbox" onChange={(e) => handleCheckboxChange(e, index)} checked={task.checked}/>
-                                <span onClick={(e) => handleEditTask(index ,'completedTasks')}>{task.title}</span>
-                            </li>
-                        )}
-                    </ul>
-                </div>
-            </div>
-            <div className="form">
-                <div className="formContainer">
-                    <input type="hidden" id='idEdicao' />
-                    <input type="hidden" id='tipoTaskEditando' />
-                    <div className="inputs" onKeyDown={(e) => { e.key === "Enter" && handleSaveTask() }}>
-                        <input type="text" className="inputTitle" value={newTaskTitle} onChange={handleTitleInputChange} />
-                        <textarea id="" onChange={handleDescriptionChange} value={newTaskDescription}></textarea>
-                        <input type="date" onChange={handleDueDateChange} value={newTaskDueDate} />
-                        <div className="range">
-                            <input type="range" onChange={handlePriorityChange} min='1' max='10' value={newTaskPriority} />
-                            <span>{newTaskPriority}</span>
-                        </div>
+                <div className="containerLists">
+                    <div className="listContainer">
+                        <h2>Tarefas não feitas</h2>
+                        <ul>
+                            {tasks.map((task, index) =>
+                                <li key={index}>
+                                    <input type="checkbox" onChange={(e) => handleCheckboxChange(e, index)} checked={task.checked} />
+                                    <span onClick={(e) => handleEditTask(index, 'normalTask')}>{task.title}</span>
+                                </li>
+                            )}
+                        </ul>
                     </div>
-                    <button onClick={handleSaveTask} className='button-save'>Save</button>
-                    <button onClick={handleCancel} className='button-cancel'>Cancel</button>
-                    <button onClick={handleDelete} className='button-delete'>Delete</button>
+                    <div className="completeListContainer">
+                        <h2>Tarefas feitas</h2>
+                        <ul>
+                            {completedTasks.map((task, index) =>
+                                <li key={index}>
+                                    <input type="checkbox" onChange={(e) => handleCheckboxChange(e, index)} checked={task.checked} />
+                                    <span onClick={(e) => handleEditTask(index, 'completedTasks')}>{task.title}</span>
+                                </li>
+                            )}
+                        </ul>
+                    </div>
+                    <div className="info">
+                        <p>Quantidade de tarefas restantes: {qtdeTasks}</p>
+                        <p>Quantidade de tarefas feitas: {qtdeCompletedTasks}</p>
+                    </div>
                 </div>
+                <div className="form">
+                    <div className="formContainer">
+                        <input type="hidden" id='idEdicao' />
+                        <input type="hidden" id='tipoTaskEditando' />
+                        <div className="inputs" onKeyDown={(e) => { e.key === "Enter" && handleSaveTask() }}>
+                            <p><label htmlFor="titulo">Titulo: </label><input type="text" className="inputTitle" id='titulo' value={newTaskTitle} onChange={handleTitleInputChange} /></p>
+                            <p><label htmlFor="descricao">Descrição: </label><textarea id="descricao" onChange={handleDescriptionChange} value={newTaskDescription}></textarea></p>
+                            <p><label htmlFor="data">Até: </label><input type="date" id='data' onChange={handleDueDateChange} value={newTaskDueDate} /></p>
+                            <div className="range">
+                                <p><label htmlFor="prioridade">Prioridade: </label><input type="range" id='prioridade' onChange={handlePriorityChange} min='1' max='10' value={newTaskPriority} /></p>
+                                <span>{newTaskPriority}</span>
+                            </div>
+                        </div>
+                        <button onClick={handleSaveTask} className='button-save'>Save</button>
+                        <button onClick={handleCancel} className='button-cancel'>Cancel</button>
+                        <button onClick={handleDelete} className='button-delete'>Delete</button>
+                    </div>
+                </div>
+
             </div>
-            <p>Quantidade de tarefas restantes: {qtdeTasks}</p>
-            <p>Quantidade de tarefas feitas: {qtdeCompletedTasks}</p>
         </>
     )
 
