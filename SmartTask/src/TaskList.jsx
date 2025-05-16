@@ -6,7 +6,7 @@ function TaskList() {
     const [newTaskTitle, setNewTaskTitle] = useState("");
     const [newTaskDescription, setNewTaskDescription] = useState('')
     const [newTaskDueDate, setNewTaskDueDate] = useState(new Date().toISOString().split('T')[0])
-    const [newTaskPriority, setNewTaskPriority] = useState('')
+    const [newTaskPriority, setNewTaskPriority] = useState(1)
     const [qtdeTasks, setQtdeTasks] = useState(0);
     const [completedTasks, setCompletedTasks] = useState([])
     const [qtdeCompletedTasks, setQtdeCompletedTasks] = useState(0)
@@ -22,6 +22,7 @@ function TaskList() {
     }, [isEditing])
 
     useEffect(() => {
+        document.querySelector(".form").style.display = 'none'
         if (!localStorage.getItem("tasks")) {
             localStorage.setItem("tasks", '[]')
         }
@@ -74,7 +75,6 @@ function TaskList() {
         document.querySelector('.form').style.display = 'none'
         if (isEditing) {
             let whereCameFrom = document.querySelector("#tipoTaskEditando").value
-            // console.log(document.querySelector("#tipoTaskEditando"))
             let tempTask = whereCameFrom == 'completedTasks' ? [...completedTasks] : [...tasks]
             let index = document.querySelector("#idEdicao").value
             let checked = whereCameFrom == 'completedTasks' ? true : false
@@ -123,7 +123,6 @@ function TaskList() {
     }
 
     function handleEditTask(index, whereCamefrom) {
-        console.log(whereCamefrom)
         setIsEditing(i => true)
         setNewTaskTitle(n => whereCamefrom == 'completedTasks' ? completedTasks[index].title : tasks[index].title);
         setNewTaskDescription(n => whereCamefrom == 'completedTasks' ? completedTasks[index].description : tasks[index].description);
@@ -250,13 +249,18 @@ function TaskList() {
                             <p><label htmlFor="descricao">Descrição: </label><textarea id="descricao" onChange={handleDescriptionChange} value={newTaskDescription}></textarea></p>
                             <p><label htmlFor="data">Até: </label><input type="date" id='data' onChange={handleDueDateChange} value={newTaskDueDate} /></p>
                             <div className="range">
-                                <p><label htmlFor="prioridade">Prioridade: </label><input type="range" id='prioridade' onChange={handlePriorityChange} min='1' max='10' value={newTaskPriority} /></p>
-                                <span>{newTaskPriority}</span>
+                                <p>
+                                    <label htmlFor="prioridade">Prioridade: </label>
+                                    <input type="range" id='prioridade' onChange={handlePriorityChange} min='1' max='10' value={newTaskPriority} />
+                                    <span>{newTaskPriority}</span>
+                                </p>
                             </div>
                         </div>
-                        <button onClick={handleSaveTask} className='button-save'>Save</button>
-                        <button onClick={handleCancel} className='button-cancel'>Cancel</button>
-                        <button onClick={handleDelete} className='button-delete'>Delete</button>
+                        <div className="buttons">
+                            <button onClick={handleSaveTask} className='button-save'>Save</button>
+                            <button onClick={handleCancel} className='button-cancel'>Cancel</button>
+                            <button onClick={handleDelete} className='button-delete'>Delete</button>
+                        </div>
                     </div>
                 </div>
 
